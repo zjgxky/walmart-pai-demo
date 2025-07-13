@@ -205,3 +205,68 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+
+# ========================================
+# MLOps项目特定配置
+# ========================================
+
+# 敏感信息文件 - 绝对不要上传！
+config_local.yaml
+*_secret.yaml
+*_private.yaml
+.env*
+secrets.json
+
+# 阿里云相关敏感信息
+*access_key*
+*secret_key*
+*credentials*
+
+# 模型文件（如果太大的话）
+*.pkl
+*.joblib
+*.model
+models/
+checkpoints/
+
+# 数据文件（如果太大或敏感）
+# data/*.csv  # 如果数据文件很大，取消这行注释
+# data/*.parquet
+# data/*.json
+
+# Jupyter Notebook输出和检查点
+*.ipynb_checkpoints/
+.ipynb_checkpoints
+
+# MacOS特定文件
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# VSCode工作空间设置（可选）
+.vscode/settings.json
+.vscode/launch.json
+.vscode/tasks.json
+.vscode/extensions.json
+
+# 临时文件和日志
+temp/
+tmp/
+logs/
+*.log
+*.tmp
+
+# PAI平台相关临时文件
+.pai/
+.dsw/
+.dataworks/
+
+# 测试和调试文件
+test_config.yaml
+debug_*.py
+scratch_*.py

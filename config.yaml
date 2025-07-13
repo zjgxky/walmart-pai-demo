@@ -1,0 +1,31 @@
+# config.yaml - Walmart MLOps Demo 配置文件
+pai:
+  region: "cn-shanghai"
+  workspace_id: "你的工作空间ID"
+
+maxcompute:
+  access_id: "你的AccessKey_ID"
+  access_key: "你的AccessKey_Secret"
+  project: "ds_case_demo"
+  endpoint: "https://service.cn-shanghai.maxcompute.aliyun.com/api"
+
+dataworks:
+  workspace_name: "walmart_demo_workspace"
+
+data:
+  raw_table: "walmart_sales_raw"
+  train_table: "walmart_train_vif"
+  test_table: "walmart_test_vif"
+  target_column: "weekly_sales"
+
+training:
+  test_size: 0.2
+  random_state: 42
+  models:
+    - linear_regression
+    - elastic_net
+    - random_forest
+
+output:
+  model_dir: "/mnt/workspace/models"
+  log_level: "INFO"
