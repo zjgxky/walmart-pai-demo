@@ -1,142 +1,96 @@
-# automation/dsw_integration.py
-# DSW训练任务自动化集成脚本
-
-import os
-import json
+#!/usr/bin/env python3
+"""
+DSW集成脚本 - 自动化DSW训练任务提交和监控
+"""
+import subprocess
 import time
-import requests
+import json
 from datetime import datetime
-from typing import Dict, Any, Optional
 
-class DSWAutomationManager:
-    """DSW自动化管理器"""
-    
-    def __init__(self, config: Dict[str, Any]):
+class DSWIntegrationManager:
+    def __init__(self, config):
         self.config = config
-        self.dsw_endpoint = config.get('dsw_endpoint')
-        self.workspace_id = config.get('workspace_id')
+        self.dsw_instance_name = None
         
-    def check_training_triggers(self) -> list:
-        """检查待处理的训练触发"""
+    def submit_training_job(self, git_commit_id=None):
+        """提交DSW训练任务"""
+        print("🚀 提交DSW训练任务...")
         
-        print("🔍 检查DSW训练触发...")
+        # 生成唯一的实例名
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        self.dsw_instance_name = f"walmart-training-{timestamp}"
+        
+        # 构建训练命令
+        training_command = f"""
+        cd /root/code/walmart-pai-demo && \
+        git pull origin main && \
+        export TRAINING_COMMIT_ID='{git_commit_id or 'latest'}' && \
+        jupyter nbconvert --execute notebooks/Walmart_Training.ipynb --to notebook
+        """
+        
+        # DSW CLI命令
+        dsw_command = [
+            "dsw", "run",
+            "--instance-name", self.dsw_instance_name,
+            "--image", "registry.cn-hangzhou.aliyuncs.com/pai-dlc/pytorch-training:1.12.0-gpu-py38",
+            "--command", training_command,
+            "--instance-type", "ecs.gn6i-c4g1.xlarge",
+            "--timeout", "3600"
+        ]
         
         try:
-            # 这里应该连接MaxCompute查询训练触发表
-            # 简化版本：模拟检查触发
-            
-            triggers = [
-                {
-                    'trigger_id': '1721234567',
-                    'trigger_time': '2025-07-13 15:30:00',
-                    'trigger_reasons': '数据更新: 数据年龄12.3小时，需要重训练',
-                    'status': 'pending',
-                    'priority': 'normal'
-                }
-            ]
-            
-            if triggers:
-                print(f"📋 发现 {len(triggers)} 个待处理的训练触发")
-                for trigger in triggers:
-                    print(f"   触发ID: {trigger['trigger_id']}")
-                    print(f"   原因: {trigger['trigger_reasons']}")
+            result = subprocess.run(dsw_command, capture_output=True, text=True)
+            if result.returncode == 0:
+                print(f"✅ DSW训练任务已提交: {self.dsw_instance_name}")
+                return True
             else:
-                print("✅ 没有待处理的训练触发")
-            
-            return triggers
-            
+                print(f"❌ DSW任务提交失败: {result.stderr}")
+                return False
         except Exception as e:
-            print(f"❌ 检查训练触发失败: {e}")
-            return []
-    
-    def prepare_training_environment(self, git_commit_id: str) -> Dict[str, Any]:
-        """准备训练环境"""
-        
-        print(f"🔧 准备训练环境 (Git: {git_commit_id[:8]}...)")
-        
-        # 生成训练任务配置
-        training_config = {
-            'task_id': f"auto_train_{int(time.time())}",
-            'git_commit_id': git_commit_id,
-            'repository_url': 'https://github.com/你的用户名/walmart-pai-demo',
-            'training_script': 'notebooks/Walmart_Training.ipynb',
-            'instance_type': 'ecs.c6.large',
-            'resource_config': {
-                'cpu_cores': 2,
-                'memory_gb': 4,
-                'timeout_hours': 2
-            },
-            'environment': {
-                'python_version': '3.8',
-                'packages': 'requirements.txt'
-            }
-        }
-        
-        print(f"✅ 训练任务配置已生成: {training_config['task_id']}")
-        
-        return training_config
-    
-    def trigger_dsw_training(self, training_config: Dict[str, Any]) -> bool:
-        """触发DSW训练任务"""
-        
-        print(f"🚀 触发DSW训练任务: {training_config['task_id']}")
-        
-        try:
-            # 在实际环境中，这里会调用DSW API
-            # 示例：使用PAI SDK或REST API提交训练任务
-            
-            # 模拟API调用
-            training_request = {
-                'workspace_id': self.workspace_id,
-                'instance_type': training_config['instance_type'],
-                'command': f"""
-                # 自动化训练脚本
-                cd /mnt/workspace
-                git clone {training_config['repository_url']}
-                cd walmart-pai-demo
-                git checkout {training_config['git_commit_id']}
-                pip install -r requirements.txt
-                
-                # 运行训练（转换Jupyter为Python脚本）
-                jupyter nbconvert --to script notebooks/Walmart_Training.ipynb
-                python notebooks/Walmart_Training.py
-                """,
-                'timeout': training_config['resource_config']['timeout_hours'] * 3600
-            }
-            
-            # 模拟成功提交
-            job_id = f"dsw_job_{int(time.time())}"
-            
-            print(f"✅ DSW训练任务已提交")
-            print(f"   任务ID: {job_id}")
-            print(f"   Git版本: {training_config['git_commit_id'][:8]}...")
-            print(f"   预计运行时间: {training_config['resource_config']['timeout_hours']} 小时")
-            
-            # 记录训练任务状态
-            self._record_training_task(training_config, job_id)
-            
-            return True
-            
-        except Exception as e:
-            print(f"❌ 触发DSW训练失败: {e}")
+            print(f"❌ DSW集成失败: {e}")
             return False
     
-    def _record_training_task(self, training_config: Dict[str, Any], job_id: str):
-        """记录训练任务状态"""
+    def wait_for_completion(self, max_wait_minutes=60):
+        """等待训练完成"""
+        print(f"⏳ 等待训练完成，最长等待{max_wait_minutes}分钟...")
         
-        task_record = {
-            'task_id': training_config['task_id'],
-            'job_id': job_id,
-            'git_commit_id': training_config['git_commit_id'],
-            'status': 'running',
-            'start_time': datetime.now().isoformat(),
-            'config': training_config
-        }
+        start_time = time.time()
+        max_wait_seconds = max_wait_minutes * 60
         
-        # 在实际环境中，这里会保存到MaxCompute或其他存储
-        print(f"📝 训练任务记录已保存")
+        while time.time() - start_time < max_wait_seconds:
+            # 检查DSW实例状态
+            status = self._check_dsw_status()
+            
+            if status == "Completed":
+                print("✅ DSW训练任务已完成")
+                return True
+            elif status == "Failed":
+                print("❌ DSW训练任务失败")
+                return False
+            elif status == "Running":
+                print("🔄 训练进行中...")
+                time.sleep(60)  # 等待1分钟
+            else:
+                print(f"🤔 未知状态: {status}")
+                time.sleep(30)
+        
+        print("⏰ 训练超时")
+        return False
     
-    def monitor_training_status(self, job_id: str) -> Dict[str, Any]:
-        """监控训练状态"""
-        
-        print(f"👁️ 监控训练状态: {job_id}")
+    def _check_dsw_status(self):
+        """检查DSW实例状态"""
+        try:
+            # 模拟状态检查（实际环境中调用DSW API）
+            # 这里可以通过查询MaxCompute训练记录表来判断
+            return "Running"  # 简化返回
+        except Exception as e:
+            print(f"⚠️ 状态检查失败: {e}")
+            return "Unknown"
+
+if __name__ == "__main__":
+    # 示例用法
+    config = {}
+    dsw_manager = DSWIntegrationManager(config)
+    
+    if dsw_manager.submit_training_job():
+        dsw_manager.wait_for_completion()

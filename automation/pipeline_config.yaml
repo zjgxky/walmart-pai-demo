@@ -1,0 +1,51 @@
+# automation/pipeline_config.yaml - 简化版，避免功能重复
+pipeline:
+  name: "walmart_sales_prediction_pipeline"
+  
+  # 明确的节点分工
+  workflow:
+    - stage: "code_sync"
+      node: "sync_git_code"
+      type: "Shell"
+      
+    - stage: "data_processing"  
+      node: "walmart_data_eda_auto"
+      type: "PyODPS"
+      
+    - stage: "feature_engineering"
+      node: "walmart_feature_engineering_auto"
+      type: "PyODPS"
+      
+    - stage: "model_training"
+      node: "trigger_dsw_training"
+      type: "Shell"
+      
+    - stage: "batch_prediction"
+      node: "walmart_batch_prediction_auto"
+      type: "PyODPS"
+      
+    - stage: "model_deployment"
+      node: "deploy_to_eas_auto"
+      type: "PyODPS"
+      code_source: "git://dataworks/deploy_to_eas.py"  # 使用原有文件
+      
+    - stage: "monitoring_and_retraining"
+      node: "monitor_performance_auto"
+      type: "PyODPS"
+      code_source: "git://dataworks/monitor_performance.py"  # 使用原有完整监控
+      
+    - stage: "data_trigger_check"
+      node: "data_trigger_monitor"
+      type: "PyODPS"
+      code_source: "git://dataworks/data_trigger_monitor.py"  # 新的简化数据监控
+      schedule: "0 1 * * *"  # 每日凌晨1点检查数据
+
+  # 明确的触发分工
+  triggers:
+    data_freshness:
+      handler: "data_trigger_monitor.py"
+      action: "log_trigger_event"
+      
+    performance_degradation:
+      handler: "monitor_performance.py"  # 使用原有完整功能
+      action: "create_retrain_task"
