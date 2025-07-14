@@ -88,6 +88,7 @@ walmart-pai-demo/
     ├── setup_guide.md                 # 环境配置指南
     ├── version_management.md          # 版本管理说明
     └── automation_guide.md            # 自动化使用指南
+    └── DEPLOYMENT_GUIDE.md            # 部署指南
 ```
 
 ## 快速开始
