@@ -147,6 +147,7 @@ CREATE TABLE IF NOT EXISTS walmart_sales_raw (
 ```sql
 SELECT COUNT(*) FROM walmart_sales_raw;
 -- 应该显示 6435 行数据
+```
 ![DSW上传数据完成](./images/dsw_upload_success.png)
 
 ---
