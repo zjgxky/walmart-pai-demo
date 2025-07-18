@@ -1,28 +1,3 @@
-<style>
-img {
-    width: 50%;
-    max-width: 600px;
-    height: auto;
-    display: block;
-    margin: 20px auto;
-}
-
-/* 连续两张图片并排显示 */
-img + img {
-    display: inline-block;
-    width: 45%;
-    margin: 10px 2.5%;
-    vertical-align: top;
-}
-
-img:nth-of-type(odd) + img {
-    display: inline-block;
-    width: 45%;
-    margin: 10px 2.5%;
-}
-</style>
-
-
 # Walmart销量预测Demo - 完整部署教程
 
 ## 📋 概述
@@ -41,14 +16,15 @@ img:nth-of-type(odd) + img {
 - ✅ 登录 [PAI控制台](https://pai.console.aliyun.com/?spm=a2c4g.11186623.0.0.39156d22kRyjIo)
 - ✅ 左上角选择开通区域，然后一键开通并创建默认工作空间
 
-![新建工作空间](../images/pai-workspace-setup.png)
+<img src="../images/pai-workspace-setup.png" width="50%" alt="新建工作空间">
 
 #### 2. 开通OSS对象存储
 - ✅ [开通OSS](https://oss.console.aliyun.com/overview?spm=a2c4g.11186623.0.0.d1477031quQo7q)并[创建Bucket](https://oss.console.aliyun.com/?spm=a2c4g.11186623.0.0.d1477031quQo7q)
 
-![创建bucket-1](../images/oss-bucket-1.png)
-
-![创建bucket-2](../images/oss-bucket-2.png)
+<p align="center">
+  <img src="../images/oss-bucket-1.png" width="45%" alt="创建bucket-1">
+  <img src="../images/oss-bucket-2.png" width="45%" alt="创建bucket-2">
+</p>
 
 #### 3. 开通MaxCompute服务
 - ✅ 访问 [MaxCompute控制台](https://maxcompute.console.aliyun.com/cn-shanghai/overview)
@@ -58,8 +34,11 @@ img:nth-of-type(odd) + img {
 1. 登录 [PAI控制台](https://pai.console.aliyun.com/?spm=a2c4g.11186623.0.0.39156d22kRyjIo)
 2. 进入项目工作空间后，在左侧导航栏选择：**模型开发与训练** > **交互式建模（DSW）** > **新建实例**
 
-![创建DSW实例-1](../images/dsw-init-instance-1.png)
-![创建DSW实例-2](../images/dsw_init_instance_2.png)
+<p align="center">
+  <img src="../images/dsw-init-instance-1.png" width="45%" alt="创建DSW实例-1">
+  <img src="../images/dsw_init_instance_2.png" width="45%" alt="创建DSW实例-2">
+</p>
+
 
 > **📝 重要提示：**
 > - 运行此demo只需选择**最低配置的CPU**即可
@@ -143,10 +122,10 @@ CREATE TABLE IF NOT EXISTS walmart_sales_raw (
 );
 ```
 5. **建表完成，表结构存储到MaxCompute**
-![表结构存储完成](../images/success-construct-table.png)
+<img src="../images/success-construct-table.png" width="50%" alt="表结构存储完成">
 
 **注：后续所有成功存储在MaxCompute的表格都可以在这找到：**
-![MaxCompute所有存储表格](../images/all-tables.png)
+<img src="../images/all-tables.png" width="50%" alt="MaxCompute所有存储表格">
 
 
 ### 步骤2.2: 上传原始数据
@@ -156,10 +135,10 @@ CREATE TABLE IF NOT EXISTS walmart_sales_raw (
    - 访问：[DataWorks数据上传与下载](https://dataworks.data.aliyun.com/cn-shanghai/uad#/upload?type=create)
 
 2. **从本地/OSS上传表格**
-
-![填写表格来源和去处](../images/DataWorks-Upload-1.png)
-
-![上传文件预览](../images/DataWorks-Upload-2.png)
+<p align="center">
+   <img src="../images/DataWorks-Upload-1.png" width="45%" alt="填写表格来源和去处">
+   <img src="../images/DataWorks-Upload-2.png" width="45%" alt="上传文件预览">
+<p>
 
 #### 方法2: 利用DSW脚本
 1. **在DSW中打开** `notebooks/Upload_Source_File.ipynb`
@@ -173,7 +152,8 @@ CREATE TABLE IF NOT EXISTS walmart_sales_raw (
 SELECT COUNT(*) FROM walmart_sales_raw;
 -- 应该显示 6435 行数据
 ```
-![DSW上传数据完成](../images/dsw_upload_success.png)
+<img src="../images/dsw_upload_success.png" width="50%" alt="DSW上传数据完成">
+
 
 ---
 
@@ -244,7 +224,8 @@ SELECT COUNT(*) FROM walmart_test_vif;
      - 模型评估和比较
      - 模型保存和注册
 
-![模型训练完成](../images/model_training_result.png)
+<img src="../images/model_training_result.png" width="50%" alt="模型训练完成">
+
 
 2. **验证训练结果**：
    - 检查 `/mnt/workspace/models/` 目录下的模型文件
