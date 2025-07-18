@@ -12,7 +12,7 @@
 
 ### 1. 阿里云账号和服务开通
 - ✅ 开通PAI。登录 [PAI控制台](https://pai.console.aliyun.com/?spm=a2c4g.11186623.0.0.39156d22kRyjIo)，左上角选择开通区域，然后一键开通并创建默认工作空间。
-![新建工作空间](./images/新建工作空间.png)
+![新建工作空间](./images/pai-workspace-setup.png)
 
 - ✅ 开通MaxCompute服务(DataWorks组合开通)：https://maxcompute.console.aliyun.com/cn-shanghai/overview
 - ✅ 创建DSW实例
