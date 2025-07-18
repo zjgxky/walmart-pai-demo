@@ -279,6 +279,8 @@ GROUP BY model_name;
 SELECT * FROM model_deployment_status_v2;
 ```
 
+<img src="../images/batch_prediction_result.png" width="50%" alt="模型预测完成">
+
 ---
 
 ## 🚀 Phase 6: 模型部署（DataWorks + EAS）
