@@ -125,6 +125,7 @@ CREATE TABLE IF NOT EXISTS walmart_sales_raw (
 <img src="../images/success-construct-table.png" width="50%" alt="表结构存储完成">
 
 **注：后续所有成功存储在MaxCompute的表格都可以在这找到：**
+<br>
 <img src="../images/all-tables.png" width="50%" alt="MaxCompute所有存储表格">
 
 
@@ -186,6 +187,7 @@ SELECT COUNT(*) FROM walmart_sales_raw;
    - 将 `dataworks/feature_engineering.py` 的内容复制到节点中
    - 设置上游依赖：`walmart_data_eda`
    - 保存节点
+<img src="../images/deploy_eda_featureengi.png" width="50%" alt="添加调度关系">
 
 ### 步骤3.4: 运行数据处理流程
 1. **提交并发布节点**：
@@ -195,7 +197,11 @@ SELECT COUNT(*) FROM walmart_sales_raw;
 2. **运行流程**：
    - 运维中心 → 周期任务
    - 找到 `walmart_data_eda` → 运行
+<img src="../images/eda_result.png" width="50%" alt="EDA完成">
+
    - 等待完成后，运行 `walmart_feature_engineering`
+<img src="../images/feature_engineering_result.png" width="50%" alt="特征工程完成">
+
 
 3. **验证结果**：
 ```sql
