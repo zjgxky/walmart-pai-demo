@@ -10,26 +10,44 @@
 
 ## 🛠️ 前置准备
 
-### 1. 阿里云账号和服务开通
-- ✅ 开通PAI。登录 [PAI控制台](https://pai.console.aliyun.com/?spm=a2c4g.11186623.0.0.39156d22kRyjIo)，左上角选择开通区域，然后一键开通并创建默认工作空间。
+### 阿里云账号和服务开通
+
+#### 1. 开通PAI服务
+- ✅ 登录 [PAI控制台](https://pai.console.aliyun.com/?spm=a2c4g.11186623.0.0.39156d22kRyjIo)
+- ✅ 左上角选择开通区域，然后一键开通并创建默认工作空间
+
 ![新建工作空间](./images/pai-workspace-setup.png)
 
-- ✅ 开通MaxCompute服务(DataWorks组合开通)：https://maxcompute.console.aliyun.com/cn-shanghai/overview
-- ✅ 创建DSW实例
-- ✅ 开通PAI-EAS服务
-- ✅ 创建AccessKey（具备MaxCompute权限）
+#### 2. 开通OSS对象存储
+- ✅ [开通OSS](https://oss.console.aliyun.com/overview?spm=a2c4g.11186623.0.0.d1477031quQo7q)并[创建Bucket](https://oss.console.aliyun.com/?spm=a2c4g.11186623.0.0.d1477031quQo7q)
 
-### 2. 创建MaxCompute项目
-1. 访问 [MaxCompute控制台](https://maxcompute.console.aliyun.com/)
-2. 点击"创建项目"
-3. 填写项目信息：
-   - 项目名称：`walmart_demo_project`（或您喜欢的名称）
-   - 地域：选择离您最近的地域
-4. 记录项目名称，后续配置需要用到
+![创建bucket-1](./images/oss-bucket-1.png)
 
-### 3. 创建DataWorks工作空间
-1. 访问 [DataWorks控制台](https://dataworks.console.aliyun.com/)
-2. 创建工作空间，绑定到上面创建的MaxCompute项目
+![创建bucket-2](./images/oss-bucket-2.png)
+
+#### 3. 开通MaxCompute服务
+- ✅ 访问 [MaxCompute控制台](https://maxcompute.console.aliyun.com/cn-shanghai/overview)
+- ✅ 选择DataWorks组合开通
+
+#### 4. 创建DSW实例
+1. 登录 [PAI控制台](https://pai.console.aliyun.com/?spm=a2c4g.11186623.0.0.39156d22kRyjIo)
+2. 进入项目工作空间后，在左侧导航栏选择：**模型开发与训练** > **交互式建模（DSW）** > **新建实例**
+
+![创建DSW实例-1](./images/dsw-init-instance-1.png)
+![创建DSW实例-2](./images/dsw_init_instance_2.png)
+
+> **📝 重要提示：**
+> - 运行此demo只需选择**最低配置的CPU**即可
+> - DSW实例运行时会产生费用，**使用后记得关闭**
+> - 建议将模型文件拷贝至OSS中持久化存储
+> - 公共资源组的DSW实例停机超过15天，云盘内容将被清空
+
+#### 5. 开通PAI-EAS服务
+- ✅ 在PAI控制台中开通EAS模型在线服务
+
+#### 6. 创建AccessKey
+- ✅ 创建具备MaxCompute权限的AccessKey
+- ✅ 妥善保存AccessKey ID和AccessKey Secret
 
 ---
 
@@ -39,7 +57,6 @@
 1. **启动DSW实例**：
    - 访问PAI控制台 → DSW
    - 创建或启动一个DSW实例
-   - 建议配置：CPU 4核 16GB内存
 
 2. **在DSW Terminal中克隆代码**：
 ```bash
@@ -83,8 +100,10 @@ print('配置验证通过:', config['maxcompute']['project'])
 ## 📊 Phase 2: 数据准备（MaxCompute + DSW）
 
 ### 步骤2.1: 创建原始表结构
-1. **在DSW中打开SQL编辑器**或MaxCompute控制台
-2. **执行建表脚本**：
+1. **MaxCompute控制台**
+2. **选择刚才创建的项目**
+2. **点开左侧工作区 - SQL分析**
+3. **在SQL编辑器中执行建表脚本**：
 ```sql
 -- 运行 sql/create_tables.sql 中的内容
 CREATE TABLE IF NOT EXISTS walmart_sales_raw (
@@ -98,17 +117,37 @@ CREATE TABLE IF NOT EXISTS walmart_sales_raw (
     Unemployment DOUBLE
 );
 ```
+5. **建表完成，表结构存储到MaxCompute**
+![表结构存储完成](./images/success-construct-table.png)
+
+**注：后续所有成功存储在MaxCompute的表格都可以在这找到：**
+![MaxCompute所有存储表格](./images/all-tables.png)
+
 
 ### 步骤2.2: 上传原始数据
+
+#### 方法1: 利用DataWorks网页端
+1. **打开DataWorks数据上传页面**
+   - 访问：[DataWorks数据上传与下载](https://dataworks.data.aliyun.com/cn-shanghai/uad#/upload?type=create)
+
+2. **从本地/OSS上传表格**
+
+![填写表格来源和去处](./images/DataWorks-Upload-1.png)
+
+![上传文件预览](./images/DataWorks-Upload-2.png)
+
+#### 方法2: 利用DSW脚本
 1. **在DSW中打开** `notebooks/Upload_Source_File.ipynb`
+
 2. **运行所有cells**，这将：
    - 读取本地的 `Walmart.csv` 文件
    - 上传数据到MaxCompute的 `walmart_sales_raw` 表
+
 3. **验证数据上传**：
 ```sql
 SELECT COUNT(*) FROM walmart_sales_raw;
 -- 应该显示 6435 行数据
-```
+![DSW上传数据完成](./images/dsw_upload_success.png)
 
 ---
 
@@ -178,6 +217,8 @@ SELECT COUNT(*) FROM walmart_test_vif;
      - 三种模型训练（线性回归、弹性网络、随机森林）
      - 模型评估和比较
      - 模型保存和注册
+
+![模型训练完成](./images/model_training_result.png)
 
 2. **验证训练结果**：
    - 检查 `/mnt/workspace/models/` 目录下的模型文件
