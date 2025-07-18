@@ -1,3 +1,28 @@
+<style>
+img {
+    width: 50%;
+    max-width: 600px;
+    height: auto;
+    display: block;
+    margin: 20px auto;
+}
+
+/* 连续两张图片并排显示 */
+img + img {
+    display: inline-block;
+    width: 45%;
+    margin: 10px 2.5%;
+    vertical-align: top;
+}
+
+img:nth-of-type(odd) + img {
+    display: inline-block;
+    width: 45%;
+    margin: 10px 2.5%;
+}
+</style>
+
+
 # Walmart销量预测Demo - 完整部署教程
 
 ## 📋 概述
